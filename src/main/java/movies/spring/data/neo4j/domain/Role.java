@@ -19,9 +19,11 @@ public class Role {
 
 	private List<String> roles = new ArrayList<>();
 
+	@JsonIgnoreProperties("roles")
 	@StartNode
 	private Person person;
 
+	@JsonIgnoreProperties("roles")
 	@EndNode
 	private Movie movie;
 

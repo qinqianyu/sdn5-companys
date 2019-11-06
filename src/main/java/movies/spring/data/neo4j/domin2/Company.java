@@ -27,4 +27,12 @@ public class Company {
     private Set<Touzip2c> touzip2c;
 
 
+   /* @JsonIgnoreProperties("startCompany")
+    @Relationship(type = "投资")
+    private Set<Touzic2c> outTouzic2c;*/
+
+    @JsonIgnoreProperties("endCompany")
+    @Relationship(type = "投资", direction = Relationship.INCOMING)
+    private Set<Touzic2c> inTouzic2c;
+
 }

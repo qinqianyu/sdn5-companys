@@ -16,11 +16,11 @@ merge (p4:People{cerno:'00002'}) set p4+={name:'李斌'}
 merge (p3:People{cerno:'00003'}) set p3+={name:'马化腾'}
 merge (p2:People{cerno:'00004'}) set p2+={name:'马云'}
 
-merge (p1)-[:人员{position:'总裁'}]->(c2)
-merge (p1)-[:人员{position:'总经理'}]->(c3)
-merge (p1)-[:人员{position:'CEO'}]->(c4)
-merge (p4)-[:人员{position:'CEO'}]->(c2)
-merge (p3)-[:人员{position:'CEO'}]->(c3)
+merge (p1)<-[:人员{position:'总裁'}]-(c2)
+merge (p1)<-[:人员{position:'总经理'}]-(c3)
+merge (p1)<-[:人员{position:'CEO'}]-(c4)
+merge (p4)<-[:人员{position:'CEO'}]-(c2)
+merge (p3)<-[:人员{position:'CEO'}]-(c3)
 merge (p1)-[:投资]->(c2)
 merge (p1)-[:投资]->(c3)
 merge (p4)-[:投资]->(c2)

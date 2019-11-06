@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Set;
 
 import movies.spring.data.neo4j.domain.Movie;
+import movies.spring.data.neo4j.repositories.MovieRepository;
 import movies.spring.data.neo4j.services.MovieService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 public class MovieController {
 
 	private final MovieService movieService;
+	@Autowired
+	private MovieRepository movieRepository;
 	
 	public MovieController(MovieService movieService) {
 		this.movieService = movieService;
@@ -37,6 +41,13 @@ public class MovieController {
 	public Map<String, Object> graph(@RequestParam(value = "limit",required = false) Integer limit) {
 		return movieService.graph(limit == null ? 10 : limit);
 	}
+    @GetMapping("/test")
+    public Collection<Movie> graph1(@RequestParam(value = "limit",required = false) Integer limit) {
+        Collection<Movie> graph = movieRepository.graph(limit == null ? 10 : limit);
+        Movie next = graph.iterator().next();
+        System.out.println(next);
+        return graph;
+    }
     @RequestMapping("/all")
     @ResponseBody
     public Set<Movie> searchAllNode() {
