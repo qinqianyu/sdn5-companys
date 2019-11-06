@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>首页</title>
+    <link th:href="@{plugins/layui/css/layui.css}" rel="stylesheet"/>
+    <link th:href="@{css/main.css}" rel="stylesheet"/>
+</head>
+<body>
+<form>
+    <input id="save" type="button" value="初始化节点"/>
+    <input id="getAll_btn" type="button" value="获取所有节点"/>
+</form>
+<svg></svg>
+<script th:src="@{plugins/jquery-3.2.1.min.js}" type="text/javascript"></script>
+<script th:src="@{plugins/d3/4.12.2/d3.js}" type="text/javascript"></script>
+
+<!--<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>-->
+<!--<script src="https://d3js.org/d3.v5.min.js"></script>-->
+<script>
+	$(function() {
+		$("#save").on("click",function() {
+			$("svg").children().remove();// 删除 已经在 DOM 中渲染的元素
+			$.ajax({
+				type:"post",
+				url:"coder/save",
+				data:{},
+				dataType:"json",
+				success:function(result) {
+					alert(result.message);
+					$("#save").remove();
+				}
+			});
+		});
+		
+		$("#getAll_btn").on("click",function() {
+			$("svg").children().remove();// 删除 已经在 DOM 中渲染的元素
+			$.ajax({
+				type:"get",
+				url:"movie/graph",
+				data:{},
+				dataType:"json",
+				success:function(result) {
+					console.log("原始数据：")
+					console.log(result);
+<!--					console.log("处理后的数据：")-->
+<!--					console.log(dealData(result));-->
+<!--					console.log("###############")-->
+<!--			        new GroupExplorer({data:dealData(result)});-->
+			        new GroupExplorer({data:result});
+				}
+			});
+		});
+	});
+	
+	function dealData(result) {
+		var nodes = [];
+		var links = [];
+		// 丰富节点数据
+		$.each(result,function(index,value) {
+			var node = value;
+			var node_json = {id:node.flagId,name:node.name};
+			nodes.push(node_json);
+			//丰富关系数据
+			if(node.have) {
+				var haveArr = node.have; 
+				$.each(haveArr,function(hi,hv) {
+					var have_json = {source:hv.sourceId,target:hv.targetId,type:hv.type};
+					links.push(have_json);
+				});
+			}
+			if(node.like) {
+				var likeArr = node.like;
+				$.each(likeArr,function(li,lv) {
+					var like_json = {source:lv.sourceId,target:lv.targetId,type:lv.type};
+					links.push(like_json);
+				});
+			}
+		});
+		var data = {nodes:nodes,links:links};
+		return data;
+	}
+	
+    function GroupExplorer(data){
+    	// properties
+    	var deal_data_links = {
+    		deal_data:{"nodes":[],"links":[]}
+    	}
+    	$.extend(true,deal_data_links,data);
+    	
+        var defaultConfig = {
+            data:{"nodes":[],"links":[]},//critical data set
+            windowWidth:window.innerWidth,
+            windowHeight:window.innerHeight,
+            defaultLinkDistance:150
+        }
+        
+        $.extend(true,defaultConfig,data);
+        
+        var colorScale = d3.scaleOrdinal()
+            .domain(d3.range(defaultConfig.data.nodes.length))
+            .range(d3.schemeCategory20);
+        
+        var svg = d3.select("svg");
+        svg.attr("width",defaultConfig.windowWidth);
+        svg.attr("height",defaultConfig.windowHeight);
+        
+<!--        function createConn(data) {-->
+<!--        	data.links.forEach(function(e){-->
+<!--                var sourceNode = data.nodes.filter(function(n){-->
+<!--                    return n.id === e.source;-->
+<!--                })[0];-->
+<!--                var targetNode = data.nodes.filter(function(n){-->
+<!--                    return n.id === e.target;-->
+<!--                })[0];-->
+<!--                e.source = sourceNode;-->
+<!--                e.target = targetNode;-->
+<!--        	});-->
+<!--        }-->
+           function createConn(data) {
+        	data.links.forEach(function(e){
+                var sourceNode = data.nodes.filter(function(n){
+                    return n.id === e.source;
+                })[0];
+                var targetNode = data.nodes.filter(function(n){
+                    return n.id === e.target;
+                })[0];
+                e.source = sourceNode;
+                e.target = targetNode;
+        	});
+        }
+        createConn(defaultConfig.data);
+        
+        //create a force graph
+        function createForce() {
+        	var forceSimulation = d3.forceSimulation()
+            .force("link",d3.forceLink())
+            .force("charge",d3.forceManyBody())
+            .force("center",d3.forceCenter(defaultConfig.windowWidth/2,defaultConfig.windowHeight/2));
+	        //transform nodes data
+	        forceSimulation.nodes(defaultConfig.data.nodes)
+	            .on("tick",ticked);
+	        //tranform links data
+	        forceSimulation.force("link")
+	            .links(defaultConfig.data.links)
+	            .distance(defaultConfig.defaultLinkDistance);
+	        return forceSimulation;
+        }
+        var forceSimulation = createForce();
+        
+        
+        console.log("d3生成的数据：")
+        console.log(defaultConfig.data.nodes);
+        console.log(defaultConfig.data.links);
+        console.log("###########")
+        
+        //define arrow
+        function createDefs() {
+	        var defs = svg.append("svg:defs");
+	        defs.append("svg:marker")
+	            .attr("id", "marker")
+	            .attr('viewBox', '0 -5 10 10')
+	            .attr("refX", 35)
+	            .attr("refY",0)
+	            .attr('markerWidth', 10)
+	            .attr('markerHeight', 10)
+	            .attr('orient', 'auto')
+	            .append('svg:path')
+	            .attr('d', 'M0,-5L10,0L0,5')
+	            .attr("fill","brown");
+	        return defs;
+        }
+        var defs = createDefs();
+        
+        //draw links
+        function createLinks() {
+	        return svg.append("g")
+		            .selectAll("line")
+		            .data(defaultConfig.data.links)
+		            .enter()
+		            .append("line")
+		            .attr("x1",function(n){return n.source.x})
+		            .attr("y1",function(n){return n.source.y})
+		            .attr("x2",function(n){return n.target.x})
+		            .attr("y2",function(n){return n.target.y})
+		            .attr("stroke","brown")
+		            .attr("stroke-width",1)
+		            .attr("marker-end","url(#marker)");
+        }
+        var links = createLinks();
+        
+        //draw links-text
+        function createLinksText() {
+        	return svg.append("g")
+		            .selectAll("text")
+		            .data(defaultConfig.data.links)
+		            .enter()
+		            .append("text")
+		            .attr("x",function(e){
+		                return (e.source.x+e.target.x)/2;
+		            })
+		            .attr("y",function(e){
+		                return (e.source.y+e.target.y)/2;
+		            })
+		            .attr("font-size",10)
+		            .text(function(e){return e.type});
+        }
+        var links_text = createLinksText();
+        
+      	//draw nodes group = node + node-text + outer-ring + three-outer-ring
+        // create nodes_g contains all
+        function createNodes() {
+	        var nodes_g = svg.append("g")
+	            .selectAll("g")
+	            .data(defaultConfig.data.nodes)
+	            .enter()
+	            .append("g")
+	            .attr("class","node groupstyle")
+	            .attr("transform",function(e){
+	                return "translate("+e.x+","+e.y+")";
+	            })
+	            .call(d3.drag()
+	                .on("start",started)
+	                .on("drag",dragged)
+	                .on("end",ended));
+	        
+	        // create three-outer-ring
+	        var database = [1, 1, 1];
+	        var pie = d3.pie();
+	        var piedata = pie(database);
+	        var outer = defs.append("g")
+	            .attr("id", 'out_circle')
+	            .selectAll(".group")
+	            .data(piedata)
+	            .enter()
+	            .append("g")
+	            .attr("class", function (d, i) {
+	                return "action_" + i + " three_circle"
+	            });
+	        var arc = d3.arc()
+	        	.innerRadius(30)
+	        	.outerRadius(60);
+	    	outer.append("path")
+		        .attr("d", function (d) {
+		            return arc(d)
+		        })
+	        	.attr("fill", "#D2D5DA")
+	        	.attr("stroke", "#f0f0f4")
+	        	.attr("stroke-width", 2);
+	
+	    	outer.append("text")
+		        .attr("transform", function (d, i) {
+		            return "translate(" + arc.centroid(d) + ")";
+		        })
+	        	.attr("text-anchor", "middle")
+	        	.text(function (d, i) {
+			        var zi = new Array()
+		            zi[0] = "释放";
+		            zi[1] = "扩展";
+		            zi[2] = "删除";
+		            return zi[i]
+	        	})
+	        	.attr("font-size", 10);
+	    	
+		 	// nodes_g add three-outer-ring
+		    var three_part_pie = nodes_g.append("use") //  为每个节点组添加一个 use 子元素
+		        .attr("xlink:href", "#out_circle") //  指定 use 引用的内容
+		        .attr("id", function (d) {
+		            return d.index
+		        })
+		        .attr("class", function (d, i) {
+		            return "ingroup_pie_" + d.index + " three_part_pie"
+		        });
+		 	
+		 	// draw outer ring
+	        nodes_g.append("circle")
+	            .attr("class","ring")
+	            .attr("r",29)
+	            .attr("stroke-width",8);
+		 
+	        //draw nodes
+	        nodes_g.append("circle")
+	        	.attr("class","outline")
+	            .attr("r",25)
+	            .attr("stroke",function(e) {
+	                    return colorScale(e.id);
+	                })
+	            .attr("stroke-width","2px")
+	            .attr("fill",function(e){
+	            	var targetId = e.id;
+	            	var sourceId = getSourceId(deal_data_links.data.links,targetId);
+	            	var index = getIndex(defaultConfig.data.nodes,sourceId);
+	                return colorScale(index);
+	            });
+	        
+	        //draw node-text
+	        nodes_g.append("text")
+	            // .attr("x",-25)
+	            // .attr("y",10)
+	            .attr("font-size",13)
+	            .attr('text-anchor',"middle") // 水平居中
+	            .attr('dy',5)
+	            .text(function(e){return e.title});
+	        
+	        return nodes_g;
+      	}
+      	var nodes_g = createNodes();
+      	
+        function started(d){
+            if(!d3.event.active){
+                forceSimulation.alphaTarget(0.8).restart();
+            }
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+        function dragged(d){
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+        }
+        function ended(d) {
+            if(!d3.event.active){
+                forceSimulation.alphaTarget(0);
+            }
+            d.fx = null;
+            d.fy = null;
+        }
+        function ticked(){
+            links
+                .attr("x1",function(n){return n.source.x})
+                .attr("y1",function(n){return n.source.y})
+                .attr("x2",function(n){return n.target.x})
+                .attr("y2",function(n){return n.target.y})
+            links_text
+                .attr("x",function(e){
+                    return (e.source.x+e.target.x)/2;
+                })
+                .attr("y",function(e){
+                    return (e.source.y+e.target.y)/2;
+                })
+            nodes_g
+                .attr("transform",function(e){
+                    return "translate("+e.x+","+e.y+")";
+                })
+        }
+        
+        
+        /*------定义 ACTION -- 开始--------------------------------*/
+        //根据 用户点击的外轮廓的不同位置， 决定采取哪种动作。给 action 赋值，配合其他函数进行操作。
+		function registerEvent() {
+	        var ACTION = '';
+	        svg.selectAll(".action_0")
+	            .on("click", function (d, i) {
+	                ACTION = "FREE"
+	            });
+	        svg.selectAll(".action_2").on("click", function (d, i) {
+	            ACTION = "DELETE"
+	        });
+	        svg.selectAll(".action_1").on("click", function (d, i) {
+	            ACTION = "EXTENDS"
+	        });
+	        /*-------- 定义 ACTION -- 结束--------------------------------------------------*/
+	        /*---------------------- 三个动作------开始-----------------------*/
+	        svg.selectAll(".node").on("click", function (d, i) {
+	            if (ACTION) {
+	                switch (ACTION) {
+	                    case 'FREE':
+	                        d.fixed = false;
+	                        ACTION = '';//重置 ACTION
+	                        break;
+	                    case 'DELETE':
+	                    	var node_index = defaultConfig.data.nodes.indexOf(d);
+	                    	deal_data_links.data.nodes.splice(node_index,1);
+	                    	var tmp_array = new Array(); //新建一个空列表，盛放 NODES_LINK　数据集中　不符合删除条件的 关系。
+	                    	/* <![CDATA[ */
+	                    	for (var link_index = 0; link_index < deal_data_links.data.links.length; ++link_index) {
+	                            var curr_link = deal_data_links.data.links[link_index];
+	                            if (curr_link.source != d.id && curr_link.target != d.id) {
+	                                tmp_array.push(curr_link)
+	                            }
+	                        }
+	                    	/* ]]> */
+	                        deal_data_links.data.links = tmp_array;
+	                        $("svg").children().remove();// 删除 已经在 DOM 中渲染的元素
+	                        var newData = {'nodes':deal_data_links.data.nodes,'links':deal_data_links.data.links};
+	                        new GroupExplorer({data:newData});// 用删除后的 节点和 关系重建
+	                        ACTION = '';
+	                        
+	                        console.log("删除过后的数据集：");
+	                        console.log(deal_data_links.data.nodes);
+	                        console.log(deal_data_links.data.links);
+	                        console.log("###################");
+	                        
+	                        break;
+	                    case 'EXTENDS':
+	                        $.ajax({
+								type:"post",
+								url:"coder/getData",
+								data:{'name':d.name},
+								dataType:"json",
+								success:function(result) {
+									var exdata = dealData(result);
+									console.log("扩展的数据");
+									console.log(exdata);
+									/* <![CDATA[ */
+									$.each(exdata.nodes,function(index,value) {
+										var node_flag = false;
+										$.each(deal_data_links.data.nodes,function(i,v) {
+											if(value.id == v.id && value.name == v.name) {
+												node_flag = true;
+											}
+											if(node_flag) {
+												return false;
+											}
+										});
+										if(!node_flag) {
+											deal_data_links.data.nodes.push(value);
+										}
+									});
+									$.each(exdata.links,function(index,value) {
+										var links_flag = false;
+										$.each(deal_data_links.data.links,function(i,v) {
+											if(value.source == v.source && value.target == v.target && value.type == v.type) {
+												links_flag = true;
+											}
+											if(links_flag) {
+												return false;
+											}
+										});
+										if(!links_flag) {
+											deal_data_links.data.links.push(value);
+										}
+									});
+									/* ]]> */
+			                        $("svg").children().remove();// 删除 已经在 DOM 中渲染的元素
+			                        var newData = {'nodes':deal_data_links.data.nodes,'links':deal_data_links.data.links};
+			                        console.log("处理后的扩展数据：");
+			                        console.log(newData);
+			                        new GroupExplorer({data:newData});// 用删除后的 节点和 关系重建
+			                        ACTION = '';
+								}
+							});
+	                        break;
+	                }
+	            }
+	        })
+	        /*---------------------- 三个动作------结束-----------------------*/
+	        
+	   		//// some event
+	        // outer-ring
+	        $(".node").hover(function() {
+	            $(this).find(".ring").css("display","block");
+	        },function() {
+	            $(this).find(".ring").css("display","none");
+	        });
+	
+	        $(".outline,text").on("click",function() {
+	        	var three_part_pie = $(this).parent().find(".three_part_pie");
+	            var flag = three_part_pie.hasClass('select');
+	            $(".three_part_pie").removeClass("select");
+	            if(!flag) {
+	            	three_part_pie.addClass("select");
+	            }
+	        });
+	        
+        }
+		registerEvent();
+        
+        // 根据targetId获取sourceId的
+        function getSourceId(deal_data_links,targetId) {
+        	/* <![CDATA[ */
+        	for(var i = 0;i < deal_data_links.length;i++) {
+             var value = deal_data_links[i];
+             if(value.target == targetId) {
+                 return value.source;
+             }
+         }
+        	 /* ]]> */
+        	return "null";
+        }
+        
+        function getIndex(config_data_nodes,sourceId) {
+        	if(sourceId != "null") {
+        		/* <![CDATA[ */
+        			for(var i = 0;i < config_data_nodes.length;i++) {
+        				var value = config_data_nodes[i];
+        				if(value.id == sourceId) {
+                			if(value.index != 3) {
+                				return value.index;
+                			}else {
+                				return 10;
+                			}
+                		}
+        			}
+        		/* ]]> */
+        	}else {
+        		return 20;
+        	}
+        }
+        
+    }
+    // 类结束
+    
+
+</script>
+</body>
+</html>

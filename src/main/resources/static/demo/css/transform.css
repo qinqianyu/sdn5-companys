@@ -1,0 +1,48 @@
+.top-left-narrow {
+    width: 4%;
+}
+
+.top-left-wide {
+    width: 12%;
+}
+
+.top-right-narrow {
+    width: 88%;
+}
+
+.top-right-wide {
+    width: 96%;
+}
+
+.li-first-child-div-narrow {
+    padding-left: 15%
+}
+
+.li-first-child-div-wide {
+    padding-left: 4%;
+}
+
+.li-second-child-div-hidden {
+    display: none;
+}
+
+.center_hidden {
+    display: none;
+}
+
+.a_point_choice {
+    font-weight: 600;
+    color: white;
+}
+
+.li_point_choice {
+    background-color: black;
+}
+
+.a_point_choice_other {
+
+}
+
+.li_point_choice_other {
+    background-color: #545454;
+}

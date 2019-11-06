@@ -1,0 +1,153 @@
+html {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    height: 50px;
+    width: 100%;
+}
+
+li:hover {
+    background-color: #3B3B3B;
+}
+
+li i:hover {
+    color: #E0EEEE;
+}
+
+li div:hover {
+    color: #E0EEEE;
+}
+
+li a div i {
+    color: #8B8B7A;
+}
+
+.top-leve1-left-div {
+    float: left;
+    height: 100%
+}
+
+.top-level-right-div {
+    float: right;
+    height: 100%;
+}
+
+.second-level-left-div {
+    width: 100%;
+    height: 100%;
+    background-color: #545454;
+    overflow: auto;
+}
+
+.li-first-child-div {
+    width: 20%;
+    height: 50px;
+    float: left;
+    line-height: 60px;
+}
+
+.li-second-child-div {
+    width: 76%;
+    height: 100%;
+    float: right;
+    line-height: 50px;
+    text-align: center;
+    color: #8B8B7A;
+}
+
+#control-left-div {
+    cursor: pointer;
+}
+
+.second-level-right-div {
+    width: 100%;
+    height: 50px;
+    background-color: #545454
+}
+
+#control-left-div {
+    width: 50px;
+    height: 100%;
+    background-color: #545454;
+    float: left;
+    text-align: center
+}
+
+#control-left-div i {
+    color: #DBDBDB;
+
+}
+
+#control-left-div:hover {
+    background-color: black;
+}
+
+#control-left-div i:hover {
+    color: white;
+}
+
+.right-top-father {
+    height: 50px;
+    width: 200px;
+    background-color: #4D4D4D;
+    float: right;
+    line-height: 60px;
+    text-align: center
+}
+
+.right-top-son-left {
+    width: 90px;
+    background-color: slategrey;
+    height: 100%;
+    float: left;
+}
+
+.right-top-son-right {
+    width: 110px;
+    height: 100%;
+    float: right;
+    cursor: pointer;
+    background-color: #787878;
+}
+
+.main_div {
+    width: 100%;
+    height: 100%;
+    background-color: lightgray;
+}
+
+#user-circle {
+    height: 200px;
+    width: 300px;
+    position: fixed;
+    top: 50px;
+    right: 0;
+    background-color: #C4C4C4;
+    border-radius: 10px;
+    border: none;
+}
+
+#logo {
+    width: 100%;
+    height: 50px;
+    background-color: #2E2E2E;
+    color: white;
+    text-align: center;
+    line-height: 50px;
+    font-size: 40px
+}

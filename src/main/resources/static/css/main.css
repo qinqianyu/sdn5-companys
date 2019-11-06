@@ -1,0 +1,16 @@
+.node {
+    cursor: pointer;
+}
+.three_part_pie {
+    display: none;
+}
+.node .select {
+    display: block;
+}
+.ring {
+    display: none;
+    stroke: rgb(106, 198, 255);
+    opacity: 0.4;
+}
+
+
