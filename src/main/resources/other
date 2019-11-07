@@ -1,20 +1,22 @@
 
 
 CREATE CONSTRAINT ON (Company:Company) ASSERT Company.regno IS UNIQUE
-CREATE CONSTRAINT ON (People:People) ASSERT People.cerno IS UNIQUE
+CREATE CONSTRAINT ON (Person:Person) ASSERT Person.cerno IS UNIQUE
 
 
 merge (c1:Company{regno:'123456'}) set c1+={name:'华为'}
 merge (c2:Company{regno:'123457'}) set c2+={name:'小米'}
 merge (c3:Company{regno:'123458'})
 merge (c4:Company{regno:'123459'})
+merge (c5:Company{regno:'123460'}) set c5+={name:'美团'}
 
 merge (c1)-[:投资]->(c2)
+merge (c2)-[:投资]->(c5)
 
-merge (p1:People{cerno:'00001'}) set p1+={name:'雷军'}
-merge (p4:People{cerno:'00002'}) set p4+={name:'李斌'}
-merge (p3:People{cerno:'00003'}) set p3+={name:'马化腾'}
-merge (p2:People{cerno:'00004'}) set p2+={name:'马云'}
+merge (p1:Person{cerno:'00001'}) set p1+={name:'雷军'}
+merge (p4:Person{cerno:'00002'}) set p4+={name:'李斌'}
+merge (p3:Person{cerno:'00003'}) set p3+={name:'马化腾'}
+merge (p2:Person{cerno:'00004'}) set p2+={name:'马云'}
 
 merge (p1)<-[:人员{position:'总裁'}]-(c2)
 merge (p1)<-[:人员{position:'总经理'}]-(c3)

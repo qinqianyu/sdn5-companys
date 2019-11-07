@@ -1,24 +1,18 @@
-package movies.spring.data.neo4j.domin2;
+package movies.spring.data.neo4j.domin.nodes;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
+import lombok.EqualsAndHashCode;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-
-import java.util.Set;
 
 @NodeEntity
 @Data
-public class Company {
-    @Id
-    @GeneratedValue
-    private Long id;
+@EqualsAndHashCode(callSuper = false)
+public class Company extends BaseNode{
 
     private String regno;
     private String name;
 
+/*
     @Relationship(type = "人员")
     private Set<People> renyuans;
 
@@ -26,13 +20,12 @@ public class Company {
     @Relationship(type = "投资", direction = Relationship.INCOMING)
     private Set<Touzip2c> touzip2c;
 
-
-   /* @JsonIgnoreProperties("startCompany")
+    @JsonIgnoreProperties("startCompany")
     @Relationship(type = "投资")
-    private Set<Touzic2c> outTouzic2c;*/
+    private Set<Touzic2c> outTouzic2c;
 
     @JsonIgnoreProperties("endCompany")
     @Relationship(type = "投资", direction = Relationship.INCOMING)
-    private Set<Touzic2c> inTouzic2c;
+    private Set<Touzic2c> inTouzic2c;*/
 
 }

@@ -1,7 +1,6 @@
 package movies.spring.data.neo4j.repositories;
 
-import movies.spring.data.neo4j.domain.Movie;
-import movies.spring.data.neo4j.domain.Person;
+import movies.spring.data.neo4j.domin.nodes.Person;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
