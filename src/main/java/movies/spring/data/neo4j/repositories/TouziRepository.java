@@ -12,6 +12,6 @@ import java.util.Collection;
 @Repository
 public interface TouziRepository extends Neo4jRepository<Touzi, Long> {
 
-    @Query("MATCH (m)-[r:投资]-(a) RETURN m,r,a")
+    @Query("MATCH (m)-[r:投资]-(a) RETURN r")
     Collection<Touzi> graph(@Param("regno") String regno);
 }
