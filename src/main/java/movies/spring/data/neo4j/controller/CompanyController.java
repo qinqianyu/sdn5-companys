@@ -26,7 +26,15 @@ public class CompanyController {
 //        return companyService.graph(regno == null ? "123456" : regno);
 //    }
     @GetMapping("/graph")
-    public Map<String, List<Map<String, Object>>> graph1(@RequestParam(value = "regno",required = false) String regno) {
-        return allService.graph(regno == null ? "123457" : regno);
+    public Map<String, List<Map<String, Object>>> graph(@RequestParam(value = "regno",required = false) String regno) {
+        return allService.graph(regno == null ? "500107008131322" : regno);
+    }
+    @GetMapping("/graph2")
+    public Map<String, List<Map<String, Object>>> graph2(@RequestParam(value = "regno",required = false) String regno) {
+        return allService.graph2(regno == null ? "500107008131322" : regno);
+    }
+    @GetMapping("/graph3")
+    public Map<String, List<Map<String, Object>>> graph3(@RequestParam(value = "regno",required = false) String regno) {
+        return allService.graph3(regno == null ? "500107008131322" : regno);
     }
 }

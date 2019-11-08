@@ -26,6 +26,7 @@ merge (p3)<-[:人员{position:'CEO'}]-(c3)
 merge (p1)-[:投资]->(c2)
 merge (p1)-[:投资]->(c3)
 merge (p4)-[:投资]->(c2)
+merge (p4)-[:投4]->(c2)
 merge (p3)-[:投资]->(c3)
 merge (p2)-[:投资]->(c3)
 
