@@ -389,19 +389,18 @@
 	                        break;
 	                    case 'EXTENDS':
 	                        $.ajax({
-								type:"post",
-								url:"coder/getData",
-								data:{'name':d.name},
+								type:"get",
+								url:"company/graph",
+								data:{'id':d.id},
 								dataType:"json",
 								success:function(result) {
-									var exdata = dealData(result);
-									console.log("扩展的数据");
-									console.log(exdata);
+								    console.log(result)
+									var exdata = result;
 									/* <![CDATA[ */
 									$.each(exdata.nodes,function(index,value) {
 										var node_flag = false;
 										$.each(deal_data_links.data.nodes,function(i,v) {
-											if(value.id == v.id && value.name == v.name) {
+											if(value.id == v.id) {
 												node_flag = true;
 											}
 											if(node_flag) {
