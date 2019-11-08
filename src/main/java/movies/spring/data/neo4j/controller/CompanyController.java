@@ -15,16 +15,10 @@ import java.util.Map;
 @RequestMapping("/company")
 public class CompanyController {
 
-//    @Autowired
-//    private CompanyService companyService;
-
     @Autowired
     private AllService allService;
 
-//    @GetMapping("/graph")
-//    public Map<String, Object> graph(@RequestParam(value = "regno",required = false) String regno) {
-//        return companyService.graph(regno == null ? "123456" : regno);
-//    }
+
     @GetMapping("/graph")
     public Map<String, List<Map<String, Object>>> graph(@RequestParam(value = "regno",required = false) String regno) {
         return allService.graph(regno == null ? "500107008131322" : regno);

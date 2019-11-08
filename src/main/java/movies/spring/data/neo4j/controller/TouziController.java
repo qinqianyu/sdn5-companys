@@ -18,7 +18,6 @@ public class TouziController {
     @Autowired
     private TouziRepository touziRepository;
 
-
     @GetMapping("/test")
     public Collection<Touzi> graph(@RequestParam(value = "regno",required = false) String regno) {
         Collection<Touzi> graph = touziRepository.graph(regno == null ? "123457" : regno);
