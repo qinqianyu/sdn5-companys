@@ -32,7 +32,9 @@ merge (p2)-[:投资]->(c3)
 
 
 
-
+match (c5:Company{regno:'123460'})
+match (c6:Company{regno:'123461'})
+merge (c5)-[:邮政]->(c6)
 
 
 
