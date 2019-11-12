@@ -60,7 +60,6 @@
 				}
 			});
 		});
-
 	});
 
     function GroupExplorer(data){
@@ -86,19 +85,7 @@
         var svg = d3.select("svg");
         svg.attr("width",defaultConfig.windowWidth);
         svg.attr("height",defaultConfig.windowHeight);
-        
-<!--        function createConn(data) {-->
-<!--        	data.links.forEach(function(e){-->
-<!--                var sourceNode = data.nodes.filter(function(n){-->
-<!--                    return n.id === e.source;-->
-<!--                })[0];-->
-<!--                var targetNode = data.nodes.filter(function(n){-->
-<!--                    return n.id === e.target;-->
-<!--                })[0];-->
-<!--                e.source = sourceNode;-->
-<!--                e.target = targetNode;-->
-<!--        	});-->
-<!--        }-->
+
            function createConn(data) {
         	data.links.forEach(function(e){
                 var sourceNode = data.nodes.filter(function(n){

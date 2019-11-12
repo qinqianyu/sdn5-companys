@@ -12,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 @Repository
 public interface CompanyRepository extends Neo4jRepository<Company, Long> {
-
-
     @Transactional(readOnly = true)
     @Query("MATCH (m:Company{regno:{regno}})-[r*1..3]-(a) RETURN m,r,a ")
     Collection<BaseRel> graph(@Param("regno") String regno);
