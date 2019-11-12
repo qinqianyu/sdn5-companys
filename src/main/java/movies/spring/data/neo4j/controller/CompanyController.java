@@ -28,7 +28,6 @@ public class CompanyController {
 
     @GetMapping("/graph")
     public Map<String, List<Map<String, Object>>> graph(@RequestParam(value = "id",required = false) String regno) {
-        System.out.println(System.currentTimeMillis());
         return allService.graph(regno == null ? "123457" : regno);
     }
     @GetMapping("/graph2")
@@ -42,13 +41,12 @@ public class CompanyController {
 
     @GetMapping("/test")
     public Collection<BaseRel> test(@RequestParam(value = "id", required = false) String regno) {
-        System.out.println(System.currentTimeMillis());
+
         return companyRepository.graph(regno == null ? "123457" : regno);
     }
 
     @GetMapping("/test2")
     public Map<String, Object> test2(@RequestParam(value = "id", required = false) String regno) {
-        System.out.println(System.currentTimeMillis());
         return all3Service.graph(regno == null ? "123457" : regno);
     }
 }

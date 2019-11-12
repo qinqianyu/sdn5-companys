@@ -117,7 +117,7 @@
         function createForce() {
         	var forceSimulation = d3.forceSimulation()
             .force("link",d3.forceLink())
-            .force("charge",d3.forceManyBody())
+            .force("charge",d3.forceManyBody().strength(-700).distanceMin(100).distanceMax(1000))
             .force("center",d3.forceCenter(defaultConfig.windowWidth/2,defaultConfig.windowHeight/2));
 	        //transform nodes data
 	        forceSimulation.nodes(defaultConfig.data.nodes)

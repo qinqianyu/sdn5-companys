@@ -27,13 +27,11 @@ public class AllService {
     public Map<String, List<Map<String, Object>>> graph(String regno) {
 
         Collection<Touzi> touziResult = touziRepository.graph(regno);
-        System.out.println(System.currentTimeMillis());
         Collection<Renyuan> renyuanResult = renyuanRepository.graph(regno);
-        System.out.println(System.currentTimeMillis());
         HashMap<String, List<Map<String, Object>>> result = new HashMap<String, List<Map<String, Object>>>();
         AddTouzi(touziResult, result);
         AddRenyuan(renyuanResult, result);
-        System.out.println(System.currentTimeMillis());
+
         return result;
     }
     public Map<String, List<Map<String, Object>>> graph2(String regno) {
