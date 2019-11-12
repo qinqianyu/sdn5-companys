@@ -18,45 +18,52 @@ import java.util.*;
 public class All3Service {
     @Autowired
     private CompanyRepository companyRepository;
+
     public Map<String, Object> graph(String regno) {
-        List<Map<String, Object>> nodes = new ArrayList<>();
-        List<Map<String, Object>> rels = new ArrayList<>();
+        List<Map> nodes = new ArrayList<>();
+        List<Map> rels = new ArrayList<>();
         Collection<BaseRel> baseRelsResult = companyRepository.graph(regno);
-        Iterator<BaseRel> iterator = baseRelsResult.iterator();
-        while (iterator.hasNext()) {
-            BaseRel baseRel = iterator.next();
+        for (BaseRel baseRel : baseRelsResult) {
             if (baseRel instanceof Renyuan) {
-                Renyuan next = (Renyuan) baseRel;
-                Map<String, Object> startNode = CompanyToMap(next.getCompany());
-                Map<String, Object> endNode = PersonToMap(next.getPerson());
-                int index = nodes.indexOf(startNode);
-                if (index == -1) {
-                    nodes.add(startNode);
-                }
-                index = nodes.indexOf(endNode);
-                if (index == -1) {
-                    nodes.add(endNode);
-                }
-                rels.add(map3("source", startNode.get("id"), "target", endNode.get("id"), "type", next.getPosition()));
+                insertRenyuan(baseRel, nodes, rels);
             } else if (baseRel instanceof Touzi) {
-                Touzi next = (Touzi) baseRel;
-                Map<String, Object> startNode = baseNodeToMap(next.getStartNode());
-                Map<String, Object> endNode = CompanyToMap(next.getEndNode());
-                int index = nodes.indexOf(startNode);
-                if (index == -1) {
-                    nodes.add(startNode);
-                }
-                index = nodes.indexOf(endNode);
-                if (index == -1) {
-                    nodes.add(endNode);
-                }
-                rels.add(map3("source", startNode.get("id"), "target", endNode.get("id"), "type", RelsType.TOUZI));
+                insertTouzi(baseRel, nodes, rels);
             }
         }
-        HashMap<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         result.put("nodes", nodes);
         result.put("links", rels);
         return result;
+    }
+
+    private void insertRenyuan(BaseRel baseRel, List<Map> nodes, List<Map> rels) {
+        Renyuan next = (Renyuan) baseRel;
+        Map<String, Object> startNode = CompanyToMap(next.getCompany());
+        Map<String, Object> endNode = PersonToMap(next.getPerson());
+        int index = nodes.indexOf(startNode);
+        if (index == -1) {
+            nodes.add(startNode);
+        }
+        index = nodes.indexOf(endNode);
+        if (index == -1) {
+            nodes.add(endNode);
+        }
+        rels.add(map3("source", startNode.get("id"), "target", endNode.get("id"), "type", next.getPosition()));
+    }
+
+    private void insertTouzi(BaseRel baseRel, List<Map> nodes, List<Map> rels) {
+        Touzi next = (Touzi) baseRel;
+        Map<String, Object> startNode = baseNodeToMap(next.getStartNode());
+        Map<String, Object> endNode = CompanyToMap(next.getEndNode());
+        int index = nodes.indexOf(startNode);
+        if (index == -1) {
+            nodes.add(startNode);
+        }
+        index = nodes.indexOf(endNode);
+        if (index == -1) {
+            nodes.add(endNode);
+        }
+        rels.add(map3("source", startNode.get("id"), "target", endNode.get("id"), "type", RelsType.TOUZI));
     }
 
     private Map<String, Object> baseNodeToMap(BaseNode baseNode) {
