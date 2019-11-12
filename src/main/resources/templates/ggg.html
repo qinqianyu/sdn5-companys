@@ -1,356 +1,488 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-
-.link {
-  fill: none;
-  stroke: #666;
-  stroke-width: 1.5px;
-}
-
-#licensing {
-  fill: green;
-}
-
-.link.licensing {
-  stroke: green;
-}
-
-.link.resolved {
-  stroke-dasharray: 0,2 1;
-}
-
-circle {
-  fill: #ccc;
-  stroke: #333;
-  stroke-width: 1.5px;
-}
-
-text {
-  font: 12px Microsoft YaHei;
-  pointer-events: none;
-  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-}
-
-.linetext {
-    font-size: 12px Microsoft YaHei;
-}
-
-</style>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>首页</title>
+    <link th:href="@{css/layui.css}" rel="stylesheet"/>
+    <link th:href="@{css/main.css}" rel="stylesheet"/>
+</head>
 <body>
-<script src="http://d3js.org/d3.v3.min.js"></script>
+<form>
+    <input id="getAll_btn" type="button" value="获取一层"/>
+    <input id="getAll_btn2" type="button" value="获取2层"/>
+    <input id="getAll_btn3" type="button" value="获取3层"/>
+</form>
+<svg></svg>
+<script th:src="@{plugins/jquery-3.2.1.min.js}" type="text/javascript"></script>
+<script th:src="@{plugins/d3.js}" type="text/javascript"></script>
+
+<!--<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>-->
+<!--<script src="https://d3js.org/d3.v5.min.js"></script>-->
 <script>
-
-// http://blog.thomsonreuters.com/index.php/mobile-patent-suits-graphic-of-the-day/
-var links = [
-  {source: "同花顺", target: "IFIND", type: "resolved", rela:"主营产品"},
-  {source: "同花顺", target: "手机金融信息服务", type: "resolved", rela:"主营产品"},
-  {source: "同花顺", target: "互联网金融信息服务", type: "resolved", rela:"主营产品"},
-  {source: "同花顺", target: "网上行情交易系统", type: "resolved", rela:"主营产品"},
-  {source: "同花顺", target: "金融资讯及数据服务", type: "resolved", rela:"主营产品"},
-  {source: "同花顺", target: "互联网金融", type: "resolved",rela:"主营产品"},
-  {source: "同花顺", target: "金融服务", type: "resolved",rela:"主营产品"},
-  {source: "手机金融信息服务", target: "金融信息服务", type: "resolved", rela:"上位产品"},
-  {source: "互联网金融信息服务", target: "金融信息服务", type: "resolved", rela:"上位产品"},
-  {source: "二三四五002195", target: "金融信息服务", type: "resolved", rela:"主营产品"},
-  {source: "大智慧601519", target: "金融信息服务", type: "resolved", rela:"主营产品"},
-  {source: "大智慧601519", target: "互联网金融信息服务", type: "resolved", rela:"主营产品"},
-  {source: "金融服务", target: "移动互联网", type: "resolved", rela:"上游"},
-  {source: "金融服务", target: "互联网金融服务", type: "resolved", rela:"下位产品"},
-  {source: "金融服务", target: "综合金融服务", type: "resolved", rela:"下位产品"}
-];
-
-var nodes = {};
-
-links.forEach(function(link) {
-  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
-  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
-});
-
-var width = 1560,
-    height = 800;
-
-var force = d3.layout.force()//layout将json格式转化为力学图可用的格式
-    .nodes(d3.values(nodes))//设定节点数组
-    .links(links)//设定连线数组
-    .size([width, height])//作用域的大小
-    .linkDistance(180)//连接线长度
-    .charge(-1500)//顶点的电荷数。该参数决定是排斥还是吸引，数值越小越互相排斥
-    .on("tick", tick)//指时间间隔，隔一段时间刷新一次画面
-    .start();//开始转换
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-//箭头
-var marker=
-    svg.append("marker")
-    //.attr("id", function(d) { return d; })
-    .attr("id", "resolved")
-    //.attr("markerUnits","strokeWidth")//设置为strokeWidth箭头会随着线的粗细发生变化
-    .attr("markerUnits","userSpaceOnUse")
-    .attr("viewBox", "0 -5 10 10")//坐标系的区域
-    .attr("refX",32)//箭头坐标
-    .attr("refY", -1)
-    .attr("markerWidth", 12)//标识的大小
-    .attr("markerHeight", 12)
-    .attr("orient", "auto")//绘制方向，可设定为：auto（自动确认方向）和 角度值
-    .attr("stroke-width",2)//箭头宽度
-    .append("path")
-    .attr("d", "M0,-5L10,0L0,5")//箭头的路径
-    .attr('fill','#000000');//箭头颜色
+	$(function() {
+		$("#getAll_btn").on("click",function() {
+			$("svg").children().remove();// 删除 已经在 DOM 中渲染的元素
+			$.ajax({
+				type:"get",
+				url:"company/graph",
+				data:{},
+				dataType:"json",
+				success:function(result) {
+					console.log("原始数据：")
+					console.log(result);
+			        new GroupExplorer({data:result});
+				}
+			});
+		});
 
 
-/* 将连接线设置为曲线*/
-var path = svg.append("g").selectAll("path")
-    .data(force.links())
-    .enter().append("path")
-    .attr("class", function(d) { return "link " + d.type; })
-    .style("stroke",function(d){
-        //console.log(d);
-       return "#A254A2";//连接线的颜色
-    })
-    .attr("marker-end", function(d) { return "url(#" + d.type + ")"; });
+		$("#getAll_btn2").on("click",function() {
+			$("svg").children().remove();// 删除 已经在 DOM 中渲染的元素
+			$.ajax({
+				type:"get",
+				url:"company/graph2",
+				data:{},
+				dataType:"json",
+				success:function(result) {
+			        new GroupExplorer({data:result});
+				}
+			});
+		});
+			$("#getAll_btn3").on("click",function() {
+			$("svg").children().remove();// 删除 已经在 DOM 中渲染的元素
+			$.ajax({
+				type:"get",
+				url:"company/test2",
+				data:{},
+				dataType:"json",
+				success:function(result) {
+			        new GroupExplorer({data:result});
+				}
+			});
+		});
+
+	});
+
+    function GroupExplorer(data){
+    	// properties
+    	var deal_data_links = {
+    		deal_data:{"nodes":[],"links":[]}
+    	}
+    	$.extend(true,deal_data_links,data);
+    	
+        var defaultConfig = {
+            data:{"nodes":[],"links":[]},//critical data set
+            windowWidth:window.innerWidth,
+            windowHeight:window.innerHeight,
+            defaultLinkDistance:150
+        }
+        
+        $.extend(true,defaultConfig,data);
+        
+        var colorScale = d3.scaleOrdinal()
+            .domain(d3.range(defaultConfig.data.nodes.length))
+            .range(d3.schemeCategory20);
+        
+        var svg = d3.select("svg");
+        svg.attr("width",defaultConfig.windowWidth);
+        svg.attr("height",defaultConfig.windowHeight);
+
+           function createConn(data) {
+        	data.links.forEach(function(e){
+                var sourceNode = data.nodes.filter(function(n){
+                    return n.id === e.source;
+                })[0];
+                var targetNode = data.nodes.filter(function(n){
+                    return n.id === e.target;
+                })[0];
+                e.source = sourceNode;
+                e.target = targetNode;
+        	});
+        }
+        createConn(defaultConfig.data);
+        
+        //create a force graph
+        function createForce() {
+        	var forceSimulation = d3.forceSimulation()
+            .force("link",d3.forceLink())
+            .force("charge",d3.forceManyBody().strength(-700).distanceMin(100).distanceMax(1000))
+            .force("center",d3.forceCenter(defaultConfig.windowWidth/2,defaultConfig.windowHeight/2));
+	        //transform nodes data
+	        forceSimulation.nodes(defaultConfig.data.nodes)
+	            .on("tick",ticked);
+	        //tranform links data
+	        forceSimulation.force("link")
+	            .links(defaultConfig.data.links)
+	            .distance(defaultConfig.defaultLinkDistance);
+	        return forceSimulation;
+        }
+        var forceSimulation = createForce();
+        
+        
+        console.log("d3生成的数据：")
+        console.log(defaultConfig.data.nodes);
+        console.log(defaultConfig.data.links);
+        console.log("###########")
+        
+        //define arrow
+        function createDefs() {
+	        var defs = svg.append("svg:defs");
+	        defs.append("svg:marker")
+	            .attr("id", "marker")
+	            .attr('viewBox', '0 -5 10 10')
+	            .attr("refX", 35)
+	            .attr("refY",0)
+	            .attr('markerWidth', 10)
+	            .attr('markerHeight', 10)
+	            .attr('orient', 'auto')
+	            .append('svg:path')
+	            .attr('d', 'M0,-5L10,0L0,5')
+	            .attr("fill","brown");
+	        return defs;
+        }
+        var defs = createDefs();
+        
+        //draw links
+        function createLinks() {
+	        return svg.append("g")
+		            .selectAll("line")
+		            .data(defaultConfig.data.links)
+		            .enter()
+		            .append("line")
+		            .attr("x1",function(n){return n.source.x})
+		            .attr("y1",function(n){return n.source.y})
+		            .attr("x2",function(n){return n.target.x})
+		            .attr("y2",function(n){return n.target.y})
+		            .attr("stroke","brown")
+		            .attr("stroke-width",1)
+		            .attr("marker-end","url(#marker)");
+        }
 
 
 
-//设置连接线
-var edges_line = svg.selectAll(".edgepath")
-    .data(force.links())
-    .enter()
-    .append("path")
-    .attr({
-          'd': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
-          'class':'edgepath',
-          //'fill-opacity':0,
-          //'stroke-opacity':0,
-          //'fill':'blue',
-          //'stroke':'red',
-          'id':function(d,i) {return 'edgepath'+i;}})
-    .style("stroke",function(d){
-         var lineColor;
-         //根据关系的不同设置线条颜色
-         if(d.rela=="上位产品" || d.rela=="上游" || d.rela=="下位产品"){
-             lineColor="#A254A2";
-         }else if(d.rela=="主营产品"){
-             lineColor="#B43232";
+
+
+        var links = createLinks();
+        
+        //draw links-text
+        function createLinksText() {
+        	return svg.append("g")
+		            .selectAll("text")
+		            .data(defaultConfig.data.links)
+		            .enter()
+		            .append("text")
+		            .attr("x",function(e){
+		                return (e.source.x+e.target.x)/2;
+		            })
+		            .attr("y",function(e){
+		                return (e.source.y+e.target.y)/2;
+		            })
+		            .attr("font-size",10)
+		            .text(function(e){return e.type});
+        }
+        var links_text = createLinksText();
+
+
+
+
+
+      	//draw nodes group = node + node-text + outer-ring + three-outer-ring
+        // create nodes_g contains all
+        function createNodes() {
+	        var nodes_g = svg.append("g")
+	            .selectAll("g")
+	            .data(defaultConfig.data.nodes)
+	            .enter()
+	            .append("g")
+	            .attr("class","node groupstyle")
+	            .attr("transform",function(e){
+	                return "translate("+e.x+","+e.y+")";
+	            })
+	            .call(d3.drag()
+	                .on("start",started)
+	                .on("drag",dragged)
+	                .on("end",ended));
+	        
+	        // create three-outer-ring
+	        var database = [1, 1, 1];
+	        var pie = d3.pie();
+	        var piedata = pie(database);
+	        var outer = defs.append("g")
+	            .attr("id", 'out_circle')
+	            .selectAll(".group")
+	            .data(piedata)
+	            .enter()
+	            .append("g")
+	            .attr("class", function (d, i) {
+	                return "action_" + i + " three_circle"
+	            });
+	        var arc = d3.arc()
+	        	.innerRadius(30)
+	        	.outerRadius(60);
+	    	outer.append("path")
+		        .attr("d", function (d) {
+		            return arc(d)
+		        })
+	        	.attr("fill", "#D2D5DA")
+	        	.attr("stroke", "#f0f0f4")
+	        	.attr("stroke-width", 2);
+	
+	    	outer.append("text")
+		        .attr("transform", function (d, i) {
+		            return "translate(" + arc.centroid(d) + ")";
+		        })
+	        	.attr("text-anchor", "middle")
+	        	.text(function (d, i) {
+			        var zi = new Array()
+		            zi[0] = "释放";
+		            zi[1] = "扩展";
+		            zi[2] = "删除";
+		            return zi[i]
+	        	})
+	        	.attr("font-size", 10);
+	    	
+		 	// nodes_g add three-outer-ring
+		    var three_part_pie = nodes_g.append("use") //  为每个节点组添加一个 use 子元素
+		        .attr("xlink:href", "#out_circle") //  指定 use 引用的内容
+		        .attr("id", function (d) {
+		            return d.index
+		        })
+		        .attr("class", function (d, i) {
+		            return "ingroup_pie_" + d.index + " three_part_pie"
+		        });
+		 	
+		 	// draw outer ring
+	        nodes_g.append("circle")
+	            .attr("class","ring")
+	            .attr("r",29)
+	            .attr("stroke-width",8);
+		 
+	        //draw nodes
+	        nodes_g.append("circle")
+	        	.attr("class","outline")
+	            .attr("r",25)
+	            .attr("stroke",function(e) {
+	                    return colorScale(e.id);
+	                })
+	            .attr("stroke-width","2px")
+	            .attr("fill",function(e){
+	            	var targetId = e.id;
+	            	var sourceId = getSourceId(deal_data_links.data.links,targetId);
+	            	var index = getIndex(defaultConfig.data.nodes,sourceId);
+	                return colorScale(index);
+	            });
+	        
+	        //draw node-text
+	        nodes_g.append("text")
+	            // .attr("x",-25)
+	            // .attr("y",10)
+	            .attr("font-size",13)
+	            .attr('text-anchor',"middle") // 水平居中
+	            .attr('dy',5)
+	            .text(function(e){
+	            if (e.name==null){
+	                return e.id
+	                }
+	                 return e.name
+	            });
+	        
+	        return nodes_g;
+      	}
+      	var nodes_g = createNodes();
+      	
+        function started(d){
+            if(!d3.event.active){
+                forceSimulation.alphaTarget(0.8).restart();
+            }
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+        function dragged(d){
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+        }
+        function ended(d) {
+            if(!d3.event.active){
+                forceSimulation.alphaTarget(0);
+            }
+            d.fx = null;
+            d.fy = null;
+        }
+        function ticked(){
+            links
+                .attr("x1",function(n){return n.source.x})
+                .attr("y1",function(n){return n.source.y})
+                .attr("x2",function(n){return n.target.x})
+                .attr("y2",function(n){return n.target.y})
+            links_text
+                .attr("x",function(e){
+                    return (e.source.x+e.target.x)/2;
+                })
+                .attr("y",function(e){
+                    return (e.source.y+e.target.y)/2;
+                })
+            nodes_g
+                .attr("transform",function(e){
+                    return "translate("+e.x+","+e.y+")";
+                })
+        }
+        
+        
+        /*------定义 ACTION -- 开始--------------------------------*/
+        //根据 用户点击的外轮廓的不同位置， 决定采取哪种动作。给 action 赋值，配合其他函数进行操作。
+		function registerEvent() {
+	        var ACTION = '';
+	        svg.selectAll(".action_0")
+	            .on("click", function (d, i) {
+	                ACTION = "FREE"
+	            });
+	        svg.selectAll(".action_2").on("click", function (d, i) {
+	            ACTION = "DELETE"
+	        });
+	        svg.selectAll(".action_1").on("click", function (d, i) {
+	            ACTION = "EXTENDS"
+	        });
+	        /*-------- 定义 ACTION -- 结束--------------------------------------------------*/
+	        /*---------------------- 三个动作------开始-----------------------*/
+	        svg.selectAll(".node").on("click", function (d, i) {
+	            if (ACTION) {
+	                switch (ACTION) {
+	                    case 'FREE':
+	                        d.fixed = false;
+	                        ACTION = '';//重置 ACTION
+	                        break;
+	                    case 'DELETE':
+	                    	var node_index = defaultConfig.data.nodes.indexOf(d);
+	                    	deal_data_links.data.nodes.splice(node_index,1);
+	                    	var tmp_array = new Array(); //新建一个空列表，盛放 NODES_LINK　数据集中　不符合删除条件的 关系。
+	                    	/* <![CDATA[ */
+	                    	for (var link_index = 0; link_index < deal_data_links.data.links.length; ++link_index) {
+	                            var curr_link = deal_data_links.data.links[link_index];
+	                            if (curr_link.source != d.id && curr_link.target != d.id) {
+	                                tmp_array.push(curr_link)
+	                            }
+	                        }
+	                    	/* ]]> */
+	                        deal_data_links.data.links = tmp_array;
+	                        $("svg").children().remove();// 删除 已经在 DOM 中渲染的元素
+	                        var newData = {'nodes':deal_data_links.data.nodes,'links':deal_data_links.data.links};
+	                        new GroupExplorer({data:newData});// 用删除后的 节点和 关系重建
+	                        ACTION = '';
+	                        
+	                        console.log("删除过后的数据集：");
+	                        console.log(deal_data_links.data.nodes);
+	                        console.log(deal_data_links.data.links);
+	                        console.log("###################");
+	                        
+	                        break;
+	                    case 'EXTENDS':
+	                        $.ajax({
+								type:"get",
+								url:"company/graph",
+								data:{'id':d.id},
+								dataType:"json",
+								success:function(result) {
+								    console.log(result)
+									var exdata = result;
+									/* <![CDATA[ */
+									$.each(exdata.nodes,function(index,value) {
+										var node_flag = false;
+										$.each(deal_data_links.data.nodes,function(i,v) {
+											if(value.id == v.id) {
+												node_flag = true;
+											}
+											if(node_flag) {
+												return false;
+											}
+										});
+										if(!node_flag) {
+											deal_data_links.data.nodes.push(value);
+										}
+									});
+									$.each(exdata.links,function(index,value) {
+										var links_flag = false;
+										$.each(deal_data_links.data.links,function(i,v) {
+											if(value.source == v.source && value.target == v.target && value.type == v.type) {
+												links_flag = true;
+											}
+											if(links_flag) {
+												return false;
+											}
+										});
+										if(!links_flag) {
+											deal_data_links.data.links.push(value);
+										}
+									});
+									/* ]]> */
+			                        $("svg").children().remove();// 删除 已经在 DOM 中渲染的元素
+			                        var newData = {'nodes':deal_data_links.data.nodes,'links':deal_data_links.data.links};
+			                        console.log("处理后的扩展数据：");
+			                        console.log(newData);
+			                        new GroupExplorer({data:newData});// 用删除后的 节点和 关系重建
+			                        ACTION = '';
+								}
+							});
+	                        break;
+	                }
+	            }
+	        })
+	        /*---------------------- 三个动作------结束-----------------------*/
+	        
+	   		//// some event
+	        // outer-ring
+	        $(".node").hover(function() {
+	            $(this).find(".ring").css("display","block");
+	        },function() {
+	            $(this).find(".ring").css("display","none");
+	        });
+	
+	        $(".outline,text").on("click",function() {
+	        	var three_part_pie = $(this).parent().find(".three_part_pie");
+	            var flag = three_part_pie.hasClass('select');
+	            $(".three_part_pie").removeClass("select");
+	            if(!flag) {
+	            	three_part_pie.addClass("select");
+	            }
+	        });
+	        
+        }
+		registerEvent();
+        
+        // 根据targetId获取sourceId的
+        function getSourceId(deal_data_links,targetId) {
+        	/* <![CDATA[ */
+        	for(var i = 0;i < deal_data_links.length;i++) {
+             var value = deal_data_links[i];
+             if(value.target == targetId) {
+                 return value.source;
+             }
          }
-         return lineColor;
-     })
-    .style("pointer-events", "none")
-    .style("stroke-width",0.5)//线条粗细
-    .attr("marker-end", "url(#resolved)" );//根据箭头标记的id号标记箭头
-
-var edges_text = svg.append("g").selectAll(".edgelabel")
-.data(force.links())
-.enter()
-.append("text")
-.style("pointer-events", "none")
-//.attr("class","linetext")
-.attr({  'class':'edgelabel',
-               'id':function(d,i){return 'edgepath'+i;},
-               'dx':80,
-               'dy':0
-               //'font-size':10,
-               //'fill':'#aaa'
-               });
-
-//设置线条上的文字
-edges_text.append('textPath')
-.attr('xlink:href',function(d,i) {return '#edgepath'+i})
-.style("pointer-events", "none")
-.text(function(d){return d.rela;});
-
-//圆圈
-var circle = svg.append("g").selectAll("circle")
-    .data(force.nodes())//表示使用force.nodes数据
-    .enter().append("circle")
-    .style("fill",function(node){
-        var color;//圆圈背景色
-        var link=links[node.index];
-        if(node.name==link.source.name && link.rela=="主营产品"){
-            color="#F6E8E9";
-        }else{
-            color="#F9EBF9";
+        	 /* ]]> */
+        	return "null";
         }
-        return color;
-    })
-    .style('stroke',function(node){
-        var color;//圆圈线条的颜色
-        var link=links[node.index];
-        if(node.name==link.source.name && link.rela=="主营产品"){
-            color="#B43232";
-        }else{
-            color="#A254A2";
+        
+        function getIndex(config_data_nodes,sourceId) {
+        	if(sourceId != "null") {
+        		/* <![CDATA[ */
+        			for(var i = 0;i < config_data_nodes.length;i++) {
+        				var value = config_data_nodes[i];
+        				if(value.id == sourceId) {
+                			if(value.index != 3) {
+                				return value.index;
+                			}else {
+                				return 10;
+                			}
+                		}
+        			}
+        		/* ]]> */
+        	}else {
+        		return 20;
+        	}
         }
-        return color;
-    })
-    .attr("r", 28)//设置圆圈半径
-    .on("click",function(node){
-        //单击时让连接线加粗
-        edges_line.style("stroke-width",function(line){
-            console.log(line);
-            if(line.source.name==node.name || line.target.name==node.name){
-                return 4;
-            }else{
-                return 0.5;
-            }
-        });
-        //d3.select(this).style('stroke-width',2);
-    })
-    .call(force.drag);//将当前选中的元素传到drag函数中，使顶点可以被拖动
-    /*
-     circle.append("text")
-    .attr("dy", ".35em")
-    .attr("text-anchor", "middle")//在圆圈内添加文字
-    .text(function(d) {
-        //console.log(d);
-        return d.name;
-    }); */
-
-  //圆圈的提示文字
-  circle.append("svg:title")
-        .text(function(node) {
-            var link=links[node.index];
-            if(node.name==link.source.name && link.rela=="主营产品"){
-                return "双击可查看详情"
-            }
-         });
-/* 矩形
-var rect=svg.append("rect")
-         .attr({"x":100,"y":100,
-                "width":100,"height":50,
-                "rx":5,//水平圆角
-                "ry":10//竖直圆角
-             })
-          .style({
-             "stroke":"red",
-             "stroke-width":1,
-             "fill":"yellow"
-});*/
-var text = svg.append("g").selectAll("text")
-    .data(force.nodes())
-    //返回缺失元素的占位对象（placeholder），指向绑定的数据中比选定元素集多出的一部分元素。
-    .enter()
-    .append("text")
-    .attr("dy", ".35em")
-    .attr("text-anchor", "middle")//在圆圈中加上数据
-    .style('fill',function(node){
-        var color;//文字颜色
-        var link=links[node.index];
-        if(node.name==link.source.name && link.rela=="主营产品"){
-            color="#B43232";
-        }else{
-            color="#A254A2";
-        }
-        return color;
-    }).attr('x',function(d){
-        // console.log(d.name+"---"+ d.name.length);
-        var re_en = /[a-zA-Z]+/g;
-        //如果是全英文，不换行
-        if(d.name.match(re_en)){
-             d3.select(this).append('tspan')
-             .attr('x',0)
-             .attr('y',2)
-             .text(function(){return d.name;});
-        }
-        //如果小于四个字符，不换行
-        else if(d.name.length<=4){
-             d3.select(this).append('tspan')
-            .attr('x',0)
-            .attr('y',2)
-            .text(function(){return d.name;});
-        }else{
-            var top=d.name.substring(0,4);
-            var bot=d.name.substring(4,d.name.length);
-
-            d3.select(this).text(function(){return '';});
-
-            d3.select(this).append('tspan')
-                .attr('x',0)
-                .attr('y',-7)
-                .text(function(){return top;});
-
-            d3.select(this).append('tspan')
-                .attr('x',0)
-                .attr('y',10)
-                .text(function(){return bot;});
-        }
-        //直接显示文字
-        /*.text(function(d) {
-        return d.name; */
-    });
-
-/*  将文字显示在圆圈的外面
-var text2 = svg.append("g").selectAll("text")
-     .data(force.links())
-    //返回缺失元素的占位对象（placeholder），指向绑定的数据中比选定元素集多出的一部分元素。
-    .enter()
-    .append("text")
-    .attr("x", 150)//设置文字坐标
-    .attr("y", ".50em")
-    .text(function(d) {
-        //console.log(d);
-        //return d.name;
-        //return d.rela;
-        console.log(d);
-        return  '1111';
-    });*/
-
-function tick() {
-  //path.attr("d", linkArc);//连接线
-  circle.attr("transform", transform1);//圆圈
-  text.attr("transform", transform2);//顶点文字
-  //edges_text.attr("transform", transform3);
-  //text2.attr("d", linkArc);//连接线文字
-  //console.log("text2...................");
-  //console.log(text2);
-  //edges_line.attr("x1",function(d){ return d.source.x; });
-  //edges_line.attr("y1",function(d){ return d.source.y; });
-  //edges_line.attr("x2",function(d){ return d.target.x; });
-  //edges_line.attr("y2",function(d){ return d.target.y; });
-
-  //edges_line.attr("x",function(d){ return (d.source.x + d.target.x) / 2 ; });
-  //edges_line.attr("y",function(d){ return (d.source.y + d.target.y) / 2 ; });
-
-
-  edges_line.attr('d', function(d) {
-      var path='M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y;
-      return path;
-  });
-
-  edges_text.attr('transform',function(d,i){
-        if (d.target.x<d.source.x){
-            bbox = this.getBBox();
-            rx = bbox.x+bbox.width/2;
-            ry = bbox.y+bbox.height/2;
-            return 'rotate(180 '+rx+' '+ry+')';
-        }
-        else {
-            return 'rotate(0)';
-        }
-   });
-}
-
-//设置连接线的坐标,使用椭圆弧路径段双向编码
-function linkArc(d) {
-    //var dx = d.target.x - d.source.x,
-  // dy = d.target.y - d.source.y,
-     // dr = Math.sqrt(dx * dx + dy * dy);
-  //return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-  //打点path格式是：Msource.x,source.yArr00,1target.x,target.y
-
-  return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y
-}
-//设置圆圈和文字的坐标
-function transform1(d) {
-  return "translate(" + d.x + "," + d.y + ")";
-}
-function transform2(d) {
-      return "translate(" + (d.x) + "," + d.y + ")";
-}
-
+        
+    }
+    // 类结束
+    
 
 
 </script>
