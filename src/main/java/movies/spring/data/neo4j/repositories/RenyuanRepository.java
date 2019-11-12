@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Optional;
+
 @Repository
 public interface RenyuanRepository extends Neo4jRepository<Renyuan, Long> {
 
@@ -23,5 +25,5 @@ public interface RenyuanRepository extends Neo4jRepository<Renyuan, Long> {
     @Query("MATCH (a:Company{regno:{regno}})-[]-(b)-[]-(c)-[r:人员]-(d) RETURN c,r,d ")
     Collection<Renyuan> graph3(@Param("regno") String regno);
 
-
+    Optional<Renyuan> findById(Long aLong, int depth);
 }

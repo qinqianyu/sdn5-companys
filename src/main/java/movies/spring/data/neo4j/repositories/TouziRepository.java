@@ -1,5 +1,6 @@
 package movies.spring.data.neo4j.repositories;
 
+import movies.spring.data.neo4j.domin.rels.BaseRel;
 import movies.spring.data.neo4j.domin.rels.Touzi;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -23,4 +24,6 @@ public interface TouziRepository extends Neo4jRepository<Touzi, Long> {
     @Transactional(readOnly = true)
     @Query("MATCH (a:Company{regno:{regno}})-[]-(b)-[]-(c)-[r:投资]-(d) RETURN c,r,d ")
     Collection<Touzi> graph3(@Param("regno") String regno);
+
+
 }
