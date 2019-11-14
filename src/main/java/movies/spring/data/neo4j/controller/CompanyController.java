@@ -49,4 +49,11 @@ public class CompanyController {
     public Map<String, Object> test2(@RequestParam(value = "id", required = false) String regno) {
         return all3Service.graph(regno == null ? "123457" : regno);
     }
+
+    @GetMapping("/path")
+    public Map<String, Object> path(@RequestParam(value = "id", required = false) String regno) {
+        return all3Service.path("","");
+    }
+
+
 }

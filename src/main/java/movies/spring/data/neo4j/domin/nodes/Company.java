@@ -16,6 +16,4 @@ public class Company extends BaseNode{
     private String regno;
     private String name;
 
-
-
 }

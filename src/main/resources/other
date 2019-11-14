@@ -30,10 +30,16 @@ merge (p3)-[:投资]->(c3)
 merge (p2)-[:投资]->(c3)
 
 
+MATCH p=shortestPath(
+  (bacon:Person {cerno:'00003'})-[*]-(meg::Person {cerno:'00002'})
+)
+RETURN p
 
-match (c5:Company{regno:'123460'})
-match (c6:Company{regno:'123461'})
-merge (c5)-[:邮政]->(c6)
+
+
+
+
+
 
 
 
