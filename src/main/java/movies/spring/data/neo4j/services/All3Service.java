@@ -16,12 +16,19 @@ import java.util.*;
 
 @Service
 public class All3Service {
+
     @Autowired
     private CompanyRepository companyRepository;
 
-    public Map<String, Object> path(String cerno1,String cerno2) {
-        return  parseBaseRel(companyRepository.path(cerno1,cerno2));
+    public Map<String, Object> path(String cerno1, String cerno2) {
+        return parseBaseRel(companyRepository.path(cerno1, cerno2));
     }
+
+    public Map<String, Object> graph(String regno) {
+        return parseBaseRel(companyRepository.graph(regno));
+    }
+
+    //将查询结果转化成前台需要的格式
     private Map<String, Object> parseBaseRel(Collection<BaseRel> baseRelsResult) {
         //节点列表,也可用其它集合如set
         List<Map> nodes = new ArrayList<>();
@@ -41,12 +48,6 @@ public class All3Service {
         result.put("nodes", nodes);
         result.put("links", rels);
         return result;
-    }
-
-
-    //将查询结果转化成前台需要的格式
-    public Map<String, Object> graph(String regno) {
-        return parseBaseRel(companyRepository.graph(regno));
     }
 
     //插入人员关系的函数
