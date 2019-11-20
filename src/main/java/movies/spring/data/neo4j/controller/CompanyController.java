@@ -39,12 +39,6 @@ public class CompanyController {
         return allService.graph3(regno == null ? "123457" : regno);
     }
 
-    @GetMapping("/test")
-    public Collection<BaseRel> test(@RequestParam(value = "id", required = false) String regno) {
-
-        return companyRepository.graph(regno == null ? "123457" : regno);
-    }
-
     @GetMapping("/test2")
     public Map<String, Object> test2(@RequestParam(value = "id", required = false) String regno) {
         return all3Service.graph(regno == null ? "123457" : regno);
